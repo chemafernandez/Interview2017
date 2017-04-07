@@ -1,0 +1,97 @@
+<html>
+<head>
+    <style>
+        * { font-family: Verdana,Geneva,sans-serif; }
+    </style>
+</head>
+<body>
+<h1>Fetch an XML file, parse it and display in a table</h1>
+ <ol>
+    <li>Use AJAX via jQuery or JS API to fetch this file into the page: https://gist.githubusercontent.com/pamelafox/3000322/raw/6cc03bccf04ede0e16564926956675794efe5191/nutrition.xml
+    <li>Create a table. For each &gt;food&gt; in the XML file, create a row in the table with the food name and nutritional facts - serving size, calories, carbs.
+</ol>
+Bonus: Use the tablesorter jQuery plugin to make the table sortable by the nutritional facts.
+
+<p>Edit this file to complete the function.</p>
+<hr>
+
+<button id="btn-run">Run</button>
+
+<!-- Use this jquery link if you want -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+    function run() {
+        //alert('Put your code here.')
+        $.ajax({
+          url: "https://gist.githubusercontent.com/pamelafox/3000322/raw/6cc03bccf04ede0e16564926956675794efe5191/nutrition.xml",
+        }).done(function( data ) {
+            var parser = new DOMParser();
+            var xmlDoc = parser.parseFromString(data, "text/xml");
+            var nodes = xmlDoc.childNodes;
+            var elementTable = document.createElement('table');
+                
+            for (i=0; i<nodes.length; i++) {
+                var foods = nodes[i].childNodes;
+
+                for (j=0; j<foods.length; j++) {
+                    var nodeName = foods[j].nodeName
+
+                    if (nodeName == 'food') {
+                        var foodNodes = foods[j].childNodes;
+
+                        for (k=0; k<foodNodes.length; k++) {
+
+                            if (foodNodes[k].nodeType == 1) {
+                                var foodAttrName = foodNodes[k].nodeName;
+
+                                if (foodAttrName == 'name') {
+                                    var elementHR = document.createElement('hr');
+                                    elementTable.appendChild(elementHR);
+                                }
+
+                                if (foodAttrName == 'name' ||
+                                    foodAttrName == 'serving' ||
+                                    foodAttrName == 'calories' ||
+                                    foodAttrName == 'carb') {
+
+                                    if (foodAttrName == 'serving') {
+                                        var foodAttrValue = foodNodes[k].textContent + foodNodes[k].getAttribute('units');
+                                    } else if (foodAttrName == 'calories') {
+                                        var foodAttrValue = foodNodes[k].getAttribute('fat') + '/' + foodNodes[k].getAttribute('total');
+                                    } else {
+                                        var foodAttrValue = foodNodes[k].textContent;
+                                    }
+
+                                    var elementTR = document.createElement('tr');
+
+                                    var elementTD = document.createElement('td');
+                                    elementTD.innerHTML = foodAttrName;
+                                    elementTR.appendChild(elementTD);
+
+                                    var elementTD = document.createElement('td');
+                                    elementTD.innerHTML = foodAttrValue;
+                                    elementTR.appendChild(elementTD);
+
+                                    elementTable.appendChild(elementTR);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        //    console.log(data);
+            document.getElementById('result').appendChild(elementTable);
+        });
+    }
+    document.getElementById('btn-run').onclick = function() {
+        run()
+    };
+</script>
+
+
+<div id="result">
+    <!-- Generate the table using JavaScript and add it to this div programmatically -->
+</div>
+</body>
+</html>
